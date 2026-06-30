@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Student | Attendix</title>
+    
+    <script>
+        (function() {
+            const token = localStorage.getItem("userToken");
+            const role = localStorage.getItem("userRole");
+
+            // لو مفيش توكن، يرجع للوجين
+            if (!token) {
+                window.location.replace('login.html');
+                return;
+            }
+
+            // تأمين الأدوار: الصفحة دي للموظفين والآدمن بس
+            if (role !== "admin" && role !== "employee") {
+                alert("Access Denied: Admin and Employees Only!");
+                window.location.replace('student_dashboard.html'); // بيرجعه لصفحته لو طالب
+            }
+        })();
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --brand-color: #2563eb;
+            --brand-hover: #1d4ed8;
+            --bg-main: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-light: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 16px;
+            --transition: all 0.3s ease;
+        }
+
+        body { display: flex; background-color: var(--bg-main); color: var(--text-main); height: 100vh; overflow: hidden; font-family: 'Inter', sans-serif; }
+
+        /* Sidebar Style */
+        .sidebar { width: 280px; background-color: var(--surface); border-right: 1px solid var(--border-light); display: flex; flex-direction: column; z-index: 10; box-shadow: var(--shadow-sm); }
+        .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+        .global-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .global-brand .brand-icon { background: var(--brand-color); color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 20px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
+        .global-brand .brand-text { font-size: 22px; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; }
+        
+        .sidebar-nav { padding: 24px 0; flex: 1; display: flex; flex-direction: column; }
+        .menu-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 0 24px 8px; }
+        .nav-item { margin: 4px 16px; padding: 12px 16px; border-radius: 10px; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: var(--transition); text-decoration: none; }
+        .nav-item i { font-size: 18px; width: 24px; text-align: center; }
+        .nav-item:hover { background-color: var(--bg-main); color: var(--text-main); }
+        .nav-item.active { background-color: var(--brand-color); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 40px; background-color: var(--bg-main); }
+        .page-header { margin-bottom: 30px; }
+        .page-header h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; color: var(--text-main); margin-bottom: 8px;}
+        .page-header p { font-size: 15px; color: var(--text-muted); font-weight: 500; }
+
+        .enroll-container { display: flex; gap: 2rem; align-items: flex-start; }
+        .camera-box { flex: 1.2; background: #0f172a; border-radius: var(--radius); overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center; aspect-ratio: 4/3; box-shadow: var(--shadow-card); border: 4px solid var(--border-light); }
+        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); position: absolute; top: 0; left: 0; }
+        .camera-overlay { position: absolute; border: 2px dashed rgba(255, 255, 255, 0.5); width: 60%; height: 70%; border-radius: 50% 50% 40% 40%; pointer-events: none; box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.4); z-index: 2; }
+        
+        .form-box { flex: 1; background: var(--surface); padding: 2.5rem; border-radius: var(--radius); box-shadow: var(--shadow-card); border: 1px solid var(--border-light); }
+        .input-group { margin-bottom: 1.25rem; }
+        .input-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-main); font-size: 0.9rem; }
+        .input-group input, .input-group select { width: 100%; padding: 0.85rem 1rem; border: 1px solid var(--border-light); border-radius: 8px; font-size: 0.95rem; color: var(--text-main); background-color: var(--bg-main); transition: var(--transition); }
+        
+        #statusMessage { margin-top: 15px; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; text-align: center; display: none; flex-direction: column; gap: 5px; }
+        .btn-primary { width: 100%; background-color: var(--brand-color); color: white; border: none; padding: 1rem; border-radius: 10px; font-weight: 600; font-size: 1.05rem; cursor: pointer; transition: var(--transition); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 1rem; }
+        .btn-primary:hover:not(:disabled) { background-color: var(--brand-hover); transform: translateY(-2px); }
+        .btn-primary:disabled { background-color: #94a3b8; cursor: not-allowed; }
+
+        @media (max-width: 1024px) { .enroll-container { flex-direction: column; } .camera-box, .form-box { width: 100%; } }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="employee_home.html" class="global-brand">
+                <div class="brand-icon"><i class="fa-solid fa-layer-group"></i></div>
+                <span class="brand-text">Attendix Admin</span>
+            </a>
+        </div>
+        <div class="sidebar-nav">
+            <div class="menu-title">Control Panel</div>
+            <a href="employee_home.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="add_student.html" class="nav-item active"><i class="fa-solid fa-user-plus"></i> Add Student</a>
+            <a href="reports.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Analytics & Reports</a>
+
+            <a href="#" id="logoutBtn" class="nav-item logout-btn" style="margin-top: auto; color: #dc2626; font-weight: 600;">
+                <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1>Enroll New Student</h1>
+            <p>Register student details and capture their facial biometric data securely.</p>
+        </header>
+
+        <div class="enroll-container">
+            <div class="camera-box">
+                <video id="webcam" autoplay playsinline></video>
+                <div class="camera-overlay"></div>
+                <canvas id="canvas" style="display: none;"></canvas>
+            </div>
+
+            <div class="form-box">
+                <form id="enrollForm">
+                    <div class="input-group">
+                        <label>Student ID (Used as Password)</label>
+                        <input type="text" id="std_id" placeholder="e.g. 20230123" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Full Name</label>
+                        <input type="text" id="std_name" placeholder="John Doe" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Department</label>
+                        <select id="std_dept" required>
+                            <option value="" disabled selected>Select Department...</option>
+                            <option value="Information Systems">Information Systems</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Artificial Intelligence">Artificial Intelligence</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Academic Year</label>
+                        <select id="std_year" required>
+                            <option value="" disabled selected>Select Year...</option>
+                            <option value="1">First Year</option>
+                            <option value="2">Second Year</option>
+                            <option value="3">Third Year</option>
+                            <option value="4">Fourth Year</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>University Email</label>
+                        <input type="email" id="std_email" placeholder="name@student.sha.edu.eg" required>
+                    </div>
+
+                    <button type="button" id="captureBtn" class="btn-primary">
+                        <i class="fa-solid fa-camera"></i> Capture & Save Data
+                    </button>
+
+                    <div id="statusMessage"></div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+<script src="config.js"></script>
+
+<script>
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('captureBtn');
+    const statusMessage = document.getElementById('statusMessage');
+
+    // 1. تشغيل الكاميرا
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => { video.srcObject = stream; })
+        .catch(err => {
+            showStatus("Error: Cannot access camera! Please allow permissions.", "error");
+        });
+
+    function showStatus(text, type, append = false) {
+        statusMessage.style.display = "flex";
+
+        if(append) {
+            statusMessage.innerHTML += `<div>${text}</div>`;
+        } else {
+            statusMessage.innerHTML = `<div>${text}</div>`;
+        }
+
+        statusMessage.style.backgroundColor = type === 'error' ? "#fef2f2" : (type === 'success' ? "#ecfdf5" : "#eff6ff");
+        statusMessage.style.color = type === 'error' ? "#dc2626" : (type === 'success' ? "#059669" : "#2563eb");
+    }
+
+    // 2. المايسترو: التواصل مع بايثون والـ .NET
+    captureBtn.addEventListener('click', async () => {
+        const std_id = document.getElementById('std_id').value.trim();
+        const std_name = document.getElementById('std_name').value.trim();
+        const std_dept = document.getElementById('std_dept').value;
+        const std_year = document.getElementById('std_year').value;
+        const std_email = document.getElementById('std_email').value.trim();
+
+        if(!std_id || !std_name || !std_dept || !std_year || !std_email) {
+            showStatus('<i class="fa-solid fa-triangle-exclamation"></i> Fill all fields!', "error");
+            return;
+        }
+
+        const PYTHON_API = window.API_CONFIG.PYTHON_API_URL;
+        const DOTNET_API = window.API_CONFIG.DOTNET_API_URL;
+
+        captureBtn.disabled = true;
+        captureBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+        showStatus('<i class="fa-solid fa-camera"></i> Capturing image...', "info");
+
+        try {
+            // --- الخطوة الأولى: التقاط الصورة ---
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0);
+
+            const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+            const blob = await (await fetch(imageDataUrl)).blob();
+
+            const formData = new FormData();
+            formData.append('file', blob, 'face.jpg');
+            formData.append('std_id', std_id);
+            formData.append('std_name', std_name);
+            formData.append('std_dept', std_dept);
+            formData.append('std_year', std_year);
+            formData.append('std_email', std_email);
+
+            // --- الخطوة الثانية: إرسال لبايثون لاستخراج شفرة الوجه ---
+            showStatus('<i class="fa-solid fa-brain fa-pulse"></i> AI Extracting Face Encoding...', "info", true);
+
+            const aiResponse = await fetch(`${PYTHON_API}/api/get-face-encoding`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!aiResponse.ok) throw new Error("AI Server Error. Is Python running locally?");
+            const aiData = await aiResponse.json();
+
+            if (!aiData.success) throw new Error(`AI Error: ${aiData.message}`);
+
+            // --- الخطوة الثالثة: إرسال الداتا للـ .NET SQL Server ---
+            showStatus('<i class="fa-solid fa-database fa-flip"></i> Saving to SQL Database...', "info", true);
+
+            // 💡 هنا ظبطنا الـ Payload عشان يطابق الـ StudentRegisterDto في C# بالظبط
+            const payload = {
+                Email: std_email,
+                Password: std_id, // استخدمنا الـ ID كباسورد افتراضي
+                Name: std_name,
+                AcademicYear: parseInt(std_year),
+                Department: std_dept,
+                FaceEncoding: aiData.encoding
+            };
+
+            const netResponse = await fetch(`${DOTNET_API}/Auth/register-student`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const netData = await netResponse.json();
+
+            if (!netResponse.ok) {
+                throw new Error(netData.message || "Database registration failed.");
+            }
+
+            // لو النجاح تم
+            showStatus('<i class="fa-solid fa-circle-check"></i> Student Saved Successfully to DB!', "success");
+
+            // حفظ محلي صغير احتياطي
+            let existingStudents = JSON.parse(localStorage.getItem('mock_students')) || [];
+            existingStudents.push({ id: std_id, name: std_name, email: std_email, department: std_dept });
+            localStorage.setItem('mock_students', JSON.stringify(existingStudents));
+
+            document.getElementById('enrollForm').reset();
+
+        } catch (error) {
+            console.error("Error Details:", error);
+            showStatus(`<i class="fa-solid fa-circle-xmark"></i> ${error.message}`, "error");
+        } finally {
+            setTimeout(() => {
+                captureBtn.disabled = false;
+                captureBtn.innerHTML = '<i class="fa-solid fa-camera"></i> Capture & Save Data';
+            }, 3000);
+        }
+    });
+
+    // برمجة زرار الخروج
+    document.getElementById("logoutBtn").addEventListener("click", (e) => {
+        e.preventDefault();
+        if(confirm("Are you sure you want to sign out?")) {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.replace("login.html");
+        }
+    });
+</script>
+</body>
+</html>

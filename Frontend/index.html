@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance System | AI-Powered Solution</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* =========================================
+           1. Premium Variables & Core Setup
+        ========================================= */
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;cd
+            --text-muted: #64748b;
+            --border: rgba(226, 232, 240, 0.8);
+            
+            /* High-end layered shadows */
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+            --shadow-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.08), 0 10px 15px -5px rgba(0, 0, 0, 0.03);
+            
+            --radius: 16px;
+            /* Buttery smooth easing curve */
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --transition: all 0.5s var(--ease-out);
+            --font: 'Inter', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            padding-top: 76px; /* Offset for the fixed navbar */
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--text-main);
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+        }
+
+        .section { padding: 8rem 0; }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-header p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+        }
+
+        /* =========================================
+           2. Scroll Animations (Staggered)
+        ========================================= */
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+        }
+
+        .reveal-up.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* =========================================
+           3. Premium Navbar
+        ========================================= */
+        .main-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 76px;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .nav-logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-logo span { color: var(--primary); }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        .nav-links a:hover { color: var(--text-main); }
+        .nav-links a.active { color: var(--primary); font-weight: 600; }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; width: 0; height: 2px;
+            background-color: var(--primary);
+            transition: width 0.3s var(--ease-out);
+            border-radius: 2px;
+        }
+
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+
+        .hamburger-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-main);
+            padding: 0.5rem;
+        }
+
+        .hamburger-btn svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+        /* =========================================
+           4. Buttons & Icons
+        ========================================= */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.85rem 1.75rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease-out), background-color 0.3s, color 0.3s, border-color 0.3s;
+            cursor: pointer;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 8px 20px -6px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px -8px rgba(37, 99, 235, 0.6);
+        }
+
+        .btn-outline-light {
+            background-color: transparent;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-outline-light:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: white;
+            transform: translateY(-3px);
+        }
+
+        .btn-light {
+            background-color: white;
+            color: var(--primary);
+            box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-light:hover {
+            background-color: #f8fafc;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px -8px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon {
+            width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        /* =========================================
+           5. Dark Hero Section
+        ========================================= */
+        .hero {
+            position: relative;
+            padding: 10rem 0 8rem;
+            background-color: #020617; 
+            color: white;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .hero-glow {
+            position: absolute;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, rgba(0,0,0,0) 70%);
+            top: -200px; left: 50%;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: pulseGlow 8s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: translateX(-50%) scale(1); opacity: 0.8; }
+            100% { transform: translateX(-50%) scale(1.2); opacity: 1; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            color: white;
+            font-size: 4.5rem;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #94a3b8;
+            margin-bottom: 3rem;
+            font-weight: 400;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* =========================================
+           6. Features Cards
+        ========================================= */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-card);
+            transition: var(--transition);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at top right, rgba(37,99,235,0.03), transparent 60%);
+            z-index: -1; opacity: 0; transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+
+        .feature-card:hover::before { opacity: 1; }
+
+        .feature-icon {
+            width: 54px; height: 54px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 14px;
+            display: flex; justify-content: center; align-items: center;
+            margin-bottom: 1.75rem;
+            transition: transform 0.5s var(--ease-spring);
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(-5deg);
+            background: var(--primary);
+            color: white;
+        }
+
+        .feature-card h4 { font-size: 1.25rem; margin-bottom: 1rem; }
+        .feature-card p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; }
+
+        /* =========================================
+           7. How It Works (Steps Grid)
+        ========================================= */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            position: relative;
+        }
+
+        /* Connecting line on desktop */
+        .steps-grid::before {
+            content: '';
+            position: absolute;
+            top: 35px; left: 10%; right: 10%;
+            height: 2px;
+            background: var(--border);
+            z-index: 0;
+        }
+
+        .step-card {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-number {
+            width: 70px; height: 70px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: 800;
+            margin: 0 auto 1.5rem;
+            box-shadow: var(--shadow-card);
+            transition: var(--transition);
+        }
+
+        .step-card:hover .step-number {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: scale(1.1);
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.3);
+        }
+
+        .step-card h4 { font-size: 1.15rem; margin-bottom: 0.75rem; }
+        .step-card p { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* =========================================
+           8. System Preview (Gallery)
+        ========================================= */
+        .gallery-section {
+            background: white;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: var(--radius);
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            box-shadow: var(--shadow-card);
+        }
+
+        .gallery-item::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+            opacity: 0; transition: var(--transition);
+        }
+
+        .gallery-item:hover::after { opacity: 1; }
+
+        .gallery-item img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.8s var(--ease-out);
+        }
+
+        .gallery-item:hover img { transform: scale(1.05); }
+
+        /* =========================================
+           9. Call To Action (CTA) Section
+        ========================================= */
+        .cta-section {
+            padding: 6rem 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::after {
+            content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+            background: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.05)" stroke-width="2" fill="none"/></svg>') repeat;
+            opacity: 0.5; z-index: 1;
+        }
+
+        .cta-content {
+            position: relative; z-index: 2;
+        }
+
+        .cta-content h2 { color: white; font-size: 2.5rem; margin-bottom: 1.5rem; }
+        .cta-content p { font-size: 1.15rem; color: rgba(255, 255, 255, 0.9); margin-bottom: 2.5rem; }
+
+        /* =========================================
+           10. Footer
+        ========================================= */
+        .footer {
+            background: #020617;
+            color: #94a3b8;
+            padding: 5rem 0 2rem;
+            text-align: center;
+        }
+
+        .footer h3 { color: white; font-size: 1.5rem; margin-bottom: 1rem; }
+        .footer p { margin-bottom: 2.5rem; }
+
+        .footer-nav {
+            display: flex; justify-content: center; gap: 2rem; margin-bottom: 2.5rem;
+        }
+
+        .footer-nav a {
+            color: #94a3b8; text-decoration: none; font-weight: 500; transition: color 0.3s;
+        }
+
+        .footer-nav a:hover { color: white; }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2rem; font-size: 0.85rem;
+        }
+
+        /* =========================================
+           11. Responsive Adjustments
+        ========================================= */
+        @media (max-width: 992px) {
+            .hero h1 { font-size: 3.5rem; }
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+            .steps-grid { grid-template-columns: repeat(2, 1fr); }
+            .steps-grid::before { display: none; } /* Hide line on tablet/mobile */
+        }
+
+        @media (max-width: 768px) {
+            /* Mobile Navbar Layout */
+            .hamburger-btn { display: block; }
+            .nav-links {
+                position: absolute; top: 76px; left: 0; width: 100%;
+                background-color: var(--bg-card); flex-direction: column; gap: 0;
+                border-bottom: 1px solid var(--border); box-shadow: var(--shadow-sm);
+                clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+                transition: clip-path 0.4s var(--ease-out);
+            }
+            .nav-links.nav-active { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+            .nav-links li { width: 100%; text-align: center; }
+            .nav-links a { display: block; padding: 1.25rem 0; border-top: 1px solid var(--bg-body); }
+            .nav-links a::after { display: none; }
+            
+            .hero { padding: 6rem 0 4rem; }
+            .hero h1 { font-size: 2.5rem; }
+            .hero-btns { flex-direction: column; }
+            .hero-btns .btn { width: 100%; }
+            
+            .section { padding: 5rem 0; }
+            .features-grid { grid-template-columns: 1fr; }
+            .gallery-grid { grid-template-columns: 1fr; }
+            .steps-grid { grid-template-columns: 1fr; gap: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="main-navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="nav-logo">Smart <span>Attendance</span></a>
+            
+            <button class="hamburger-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+                <svg viewBox="0 0 24 24">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            
+            <ul class="nav-links" id="nav-menu">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="login.html">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-glow"></div>
+        <div class="container hero-content">
+            <h1 class="reveal-up" style="transition-delay: 0.1s;">Attendix</h1>
+            <p class="reveal-up" style="transition-delay: 0.2s;">Smart attendance system using Face Recognition and Manual Fallback technology to secure classroom integrity and eliminate paperwork.</p>
+            <div class="hero-btns reveal-up" style="transition-delay: 0.3s;">
+                <a href="login.html" class="btn btn-primary">Get Started</a>
+                <a href="#features" class="btn btn-outline-light">Learn More</a>
+            </div>
+        </div>
+    </header>
+
+    <section id="features" class="section">
+        <div class="container">
+            <div class="section-header reveal-up">
+                <h2>Powerful Core Features</h2>
+                <p>Everything you need to automate and manage university attendance effectively.</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card reveal-up" style="transition-delay: 0.1s;">
+                    <div class="feature-icon">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><rect x="8" y="8" width="8" height="8" rx="2"></rect></svg>
+                    </div>
+                    <h4>Face Recognition</h4>
+                    <p>Identify and verify students instantly using advanced biometric AI algorithms with 99.8% accuracy.</p>
+                </div>
+
+                <div class="feature-card reveal-up" style="transition-delay: 0.2s;">
+                    <div class="feature-icon">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg>
+                    </div>
+                    <h4>Manual ID Entry</h4>
+                    <p>Seamless fallback option allowing professors to verify and register student attendance manually using their unique university IDs.</p>
+                </div>
+
+                <div class="feature-card reveal-up" style="transition-delay: 0.3s;">
+                    <div class="feature-icon">
+                        <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    </div>
+                    <h4>Real-Time Dashboard</h4>
+                    <p>Monitor live classroom presence, view attendance metrics, and export reports instantly as Excel files.</p>
+                </div>
+
+                <div class="feature-card reveal-up" style="transition-delay: 0.4s;">
+                    <div class="feature-icon">
+                        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </div>
+                    <h4>Secure System</h4>
+                    <p>Encrypted data storage with strict university-level privacy compliance and robust anti-cheating mechanisms.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" style="background: var(--bg-card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+        <div class="container">
+            <div class="section-header reveal-up">
+                <h2>How It Works</h2>
+                <p>A seamless four-step process designed for absolute simplicity.</p>
+            </div>
+
+            <div class="steps-grid">
+                <div class="step-card reveal-up" style="transition-delay: 0.1s;">
+                    <div class="step-number">1</div>
+                    <h4>Register Student</h4>
+                    <p>Upload student data and initialize secure database records.</p>
+                </div>
+                <div class="step-card reveal-up" style="transition-delay: 0.2s;">
+                    <div class="step-number">2</div>
+                    <h4>Capture Face</h4>
+                    <p>Enroll student facial biometrics quickly during orientation.</p>
+                </div>
+                <div class="step-card reveal-up" style="transition-delay: 0.3s;">
+                    <div class="step-number">3</div>
+                    <h4>Take Attendance</h4>
+                    <p>Professor starts the lecture camera or uses manual ID entry to scan students automatically.</p>
+                </div>
+                <div class="step-card reveal-up" style="transition-delay: 0.4s;">
+                    <div class="step-number">4</div>
+                    <h4>View Dashboard</h4>
+                    <p>Analyze synced data and export final attendance reports effortlessly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section gallery-section">
+        <div class="container">
+            <div class="section-header reveal-up">
+                <h2>Inside the Ecosystem</h2>
+                <p>Modern technology designed exclusively for academic environments.</p>
+            </div>
+            
+            <div class="gallery-grid">
+                <div class="gallery-item reveal-up" style="transition-delay: 0.1s;">
+                    <img src="https://assets.aclu.org/live/uploads/2019/09/web18-schoolsurveillance-1160x768_0-800x533.jpg" alt="Facial Recognition Dashboard">
+                </div>
+                <div class="gallery-item reveal-up" style="transition-delay: 0.2s;">
+                    <img src="https://vision.cs.utexas.edu/378h-spring2017/assignments/a5/detections_IMG_9370.JPG.png" alt="Modern Lecture Hall">
+                </div>
+                <div class="gallery-item reveal-up" style="transition-delay: 0.3s;">
+                    <img src="https://analyticsdrift.com/wp-content/uploads/2021/08/Untitled-design-10-1.jpg" alt="Data Analytics and Reporting">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container cta-content">
+            <h2 class="reveal-up" style="transition-delay: 0.1s;">Start using the system today</h2>
+            <p class="reveal-up" style="transition-delay: 0.2s;">Join the professors who are already saving hours of lecture time every week.</p>
+            <div class="reveal-up" style="transition-delay: 0.3s;">
+                <a href="login.html" class="btn btn-light">Login Now</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <h3>Smart Attendance System</h3>
+            <p>Empowering universities with intelligent automation.</p>
+            
+            <div class="footer-nav">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="courses.html">Courses</a>
+                <a href="login.html">Login</a>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 Engineering Team Project. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="config.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // 1. Mobile Navbar Toggle
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const navMenu = document.getElementById('nav-menu');
+
+            mobileBtn.addEventListener('click', () => {
+                navMenu.classList.toggle('nav-active');
+            });
+
+            // 2. Intersection Observer for Advanced Entrance Animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: "0px 0px -50px 0px"
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target); 
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.reveal-up').forEach(element => {
+                observer.observe(element);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | Attendix</title>
+    
+    <script>
+        (function() {
+            const isLoggedIn = localStorage.getItem("isLoggedIn");
+            const role = localStorage.getItem("userRole");
+
+            if (isLoggedIn === "true" && role) {
+                if (role === "admin" || role === "employee") {
+                    window.location.replace("employee_home.html");
+                } else if (role === "doctor") {
+                    window.location.replace("courses.html");
+                } else {
+                    window.location.replace("student_dashboard.html");
+                }
+            } else {
+                localStorage.clear();
+                sessionStorage.clear();
+            }
+        })();
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 16px;
+            --transition: all 0.3s ease;
+        }
+
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { margin: 0; background-color: var(--bg-body); }
+        .login-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        .login-card { width: 100%; max-width: 420px; padding: 3rem 2.5rem; background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow-card); border: 1px solid var(--border); }
+        .login-header { text-align: center; margin-bottom: 2.5rem; }
+        .login-header .global-brand { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; gap: 10px; margin-bottom: 1.5rem; padding: 10px 20px; background: var(--primary-light); border-radius: 30px; transition: var(--transition); }
+        .brand-icon { color: var(--primary); font-size: 1.25rem; }
+        .brand-text { font-size: 1.25rem; font-weight: 700; color: var(--primary); letter-spacing: -0.02em; }
+        .login-header h2 { font-size: 1.75rem; color: var(--text-main); font-weight: 800; margin: 0 0 0.5rem 0; }
+        .login-header p { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
+
+        #errorMsg { background-color: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1.5rem; display: none; text-align: center; border: 1px solid #f87171; font-weight: 500; align-items: center; justify-content: center; gap: 8px;}
+
+        .input-group { margin-bottom: 1.5rem; }
+        .input-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-main); font-size: 0.9rem; }
+        .input-wrapper { position: relative; }
+        .input-wrapper i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.1rem; }
+        .input-group input { width: 100%; padding: 0.85rem 1rem 0.85rem 2.5rem; border: 1px solid var(--border); border-radius: 10px; font-size: 1rem; color: var(--text-main); background-color: var(--bg-body); transition: var(--transition); }
+        .input-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); background-color: white; }
+
+        .btn-primary { background-color: var(--primary); color: white; border: none; padding: 0.9rem; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: var(--transition); width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-primary:hover:not(:disabled) { background-color: var(--primary-hover); transform: translateY(-2px); }
+        .btn-primary:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        .back-home { display: block; text-align: center; margin-top: 1.5rem; color: var(--text-muted); text-decoration: none; font-size: 0.95rem; }
+    </style>
+</head>
+<body>
+
+    <div class="login-page">
+        <div class="login-card">
+            <div class="login-header">
+                <a href="index.html" class="global-brand">
+                    <div class="brand-icon"><i class="fa-solid fa-fingerprint"></i></div>
+                    <span class="brand-text">Attendix</span>
+                </a>
+                <h2>Welcome</h2>
+                <p>Sign in to your secure dashboard</p>
+            </div>
+
+            <div id="errorMsg"></div>
+
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fa-regular fa-envelope"></i>
+                        <input type="email" id="email" placeholder="name@sha.edu.eg" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="password" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-primary">
+                    Sign In <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <a href="index.html" class="back-home"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const errorMsg = document.getElementById("errorMsg");
+        const submitBtn = document.getElementById("submitBtn");
+
+        const DOTNET_API = window.API_CONFIG.DOTNET_API_URL;
+
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking Database...';
+        submitBtn.disabled = true;
+        errorMsg.style.display = "none";
+
+        localStorage.clear();
+        sessionStorage.clear();
+
+        try {
+            const response = await fetch(`${DOTNET_API}/Auth/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: email, password: password })
+            });
+
+            const data = await response.json();
+
+            // 🔥 التعديل السحري: بنتأكد إن الداتا رجعت success = true
+            // ومبقناش ندور على كلمة Token خالص!
+            if (response.ok && data.success === true) {
+
+                const safeRole = String(data.role).toLowerCase().trim();
+                const safeUserId = data.userId;
+
+                if (!safeUserId) {
+                    throw new Error("Backend Error: User ID is missing.");
+                }
+
+                // حفظ الداتا في اللوكال ستوريدج
+                localStorage.setItem("isLoggedIn", "true");
+                // حطينا توكن وهمي عشان باقي الصفحات متضربش إيرور
+                localStorage.setItem("userToken", "fake-jwt-token-for-local-test");
+                localStorage.setItem("userId", safeUserId);
+                localStorage.setItem("userEmail", email);
+                localStorage.setItem("userName", data.name || "User");
+                localStorage.setItem("userRole", safeRole);
+
+                // التوجيه
+                setTimeout(() => {
+                    window.location.replace(data.redirect);
+                }, 100);
+
+            } else {
+                throw new Error(data.message || "Invalid email or password. Please try again.");
+            }
+        } catch (error) {
+            console.error("Login Error:", error);
+            errorMsg.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${error.message}`;
+            errorMsg.style.display = "flex";
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>

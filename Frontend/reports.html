@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Report | Attendix</title>
+    
+    <script>
+        (function() {
+            const token = localStorage.getItem("userToken");
+            const role = localStorage.getItem("userRole");
+
+            // لو مفيش توكن، يرجع للوجين
+            if (!token) {
+                window.location.replace('login.html');
+                return;
+            }
+
+            // تأمين الأدوار: الصفحة دي للموظفين والآدمن بس
+            if (role !== "admin" && role !== "employee") {
+                alert("Access Denied: Admin and Employees Only!");
+                window.location.replace('student_dashboard.html'); 
+            }
+        })();
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --brand-color: #2563eb;
+            --brand-hover: #1d4ed8;
+            --bg-main: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-light: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 16px;
+            --transition: all 0.3s ease;
+        }
+
+        body { display: flex; background-color: var(--bg-main); color: var(--text-main); height: 100vh; overflow: hidden; font-family: 'Inter', sans-serif; }
+
+        /* ================= Sidebar (Admin Style) ================= */
+        .sidebar { width: 280px; background-color: var(--surface); border-right: 1px solid var(--border-light); display: flex; flex-direction: column; z-index: 10; box-shadow: var(--shadow-sm); }
+        .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+        .global-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .global-brand .brand-icon { background: var(--brand-color); color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 20px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
+        .global-brand .brand-text { font-size: 22px; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; }
+        
+        .sidebar-nav { padding: 24px 0; flex: 1; display: flex; flex-direction: column; }
+        .menu-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 0 24px 8px; }
+        .nav-item { margin: 4px 16px; padding: 12px 16px; border-radius: 10px; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: var(--transition); text-decoration: none; }
+        .nav-item i { font-size: 18px; width: 24px; text-align: center; }
+        .nav-item:hover { background-color: var(--bg-main); color: var(--text-main); }
+        .nav-item.active { background-color: var(--brand-color); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        
+        /* ================= Main Content ================= */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 40px; background-color: var(--bg-main); }
+        
+        .page-header { margin-bottom: 40px; }
+        .page-header h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; color: var(--text-main); margin-bottom: 8px;}
+        .page-header p { font-size: 15px; color: var(--text-muted); font-weight: 500; }
+
+        /* ================= Report Form Card ================= */
+        .report-card {
+            max-width: 600px;
+            background: var(--surface);
+            padding: 3rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-light);
+        }
+        
+        .input-group { margin-bottom: 1.5rem; position: relative; }
+        .input-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-main); font-size: 0.95rem; }
+        
+        .input-group select { 
+            width: 100%; 
+            padding: 0.85rem 1rem; 
+            border: 1px solid var(--border-light); 
+            border-radius: 10px; 
+            font-size: 1rem; 
+            color: var(--text-main);
+            background-color: var(--bg-main);
+            appearance: none; /* إخفاء سهم المتصفح الافتراضي */
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .input-group::after {
+            content: '\f107'; /* سهم FontAwesome */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 15px;
+            top: 40px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .input-group select:focus { outline: none; border-color: var(--brand-color); box-shadow: 0 0 0 4px var(--primary-light); background-color: white; }
+        
+        /* إخفاء اختيار المادة في البداية */
+        #subjectGroup { display: none; animation: fadeIn 0.3s ease; }
+
+        #errorMsg {
+            background-color: #fef2f2;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            border: 1px solid #fca5a5;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary { 
+            width: 100%; 
+            background-color: var(--brand-color); 
+            color: white; 
+            border: none; 
+            padding: 1rem; 
+            border-radius: 10px; 
+            font-weight: 600; 
+            font-size: 1.05rem; 
+            cursor: pointer; 
+            transition: var(--transition); 
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 1rem;
+        }
+        .btn-primary:hover { background-color: var(--brand-hover); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="employee_home.html" class="global-brand">
+                <div class="brand-icon"><i class="fa-solid fa-layer-group"></i></div>
+                <span class="brand-text">Attendix Admin</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-nav">
+            <div class="menu-title">Control Panel</div>
+            <a href="employee_home.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="add_student.html" class="nav-item"><i class="fa-solid fa-user-plus"></i> Add Student</a>
+            <a href="reports.html" class="nav-item active"><i class="fa-solid fa-chart-line"></i> Analytics & Reports</a>
+            
+            <a href="#" id="logoutBtn" class="nav-item logout-btn" style="margin-top: auto; color: #dc2626; font-weight: 600;">
+                <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1>Generate Reports</h1>
+            <p>Select criteria to generate detailed attendance analytics and export data.</p>
+        </header>
+
+        <div class="report-card">
+            <div class="input-group">
+                <label>Department</label>
+                <select id="department" required>
+                    <option value="" disabled selected>Select Department...</option>
+                    <option value="Information Systems">Information Systems (IS)</option>
+                    <option value="Computer Science">Computer Science (CS)</option>
+                    <option value="Artificial Intelligence">Artificial Intelligence (AI)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Academic Year</label>
+                <select id="year" required disabled title="Please select a department first">
+                    <option value="" disabled selected>Select Year...</option>
+                    <option value="1">First Year</option>
+                    <option value="2">Second Year</option>
+                    <option value="3">Third Year</option>
+                    <option value="4">Fourth Year</option>
+                </select>
+            </div>
+
+            <div class="input-group" id="subjectGroup">
+                <label>Course / Subject</label>
+                <select id="subject" required>
+                    <option value="" disabled selected>Select Course...</option>
+                    </select>
+            </div>
+
+            <div id="errorMsg" style="display: none;">
+                <i class="fa-solid fa-circle-exclamation"></i> <span>Please complete all selections to proceed.</span>
+            </div>
+
+            <button id="viewBtn" class="btn-primary">
+                <i class="fa-solid fa-chart-simple"></i> Generate Report
+            </button>
+        </div>
+    </main>
+
+    <script src="config.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const deptSelect = document.getElementById("department");
+            const yearSelect = document.getElementById("year");
+            const subjectGroup = document.getElementById("subjectGroup");
+            const subjectSelect = document.getElementById("subject");
+            const viewBtn = document.getElementById("viewBtn");
+            const errorMsg = document.getElementById("errorMsg");
+
+            // خريطة المواد (نفس اللي استخدمناها في عرض الطالب)
+            const curriculum = {
+                "Computer Science": {
+                    "4": ["Artificial Intelligence", "Software Engineering", "Cloud Computing"],
+                    "3": ["Computer Networks", "Operating Systems"],
+                    "2": ["Data Structures", "Algorithms"],
+                    "1": ["Introduction to CS", "Programming 1"]
+                },
+                "Information Systems": {
+                    "4": ["Data Mining", "E-Commerce", "IT Project Management"],
+                    "3": ["Database Systems", "System Analysis"],
+                    "2": ["Business Administration", "Web Technologies"],
+                    "1": ["Intro to IS", "Mathematics"]
+                },
+                "Artificial Intelligence": {
+                    "4": ["Deep Learning", "Computer Vision", "NLP"],
+                    "3": ["Machine Learning", "Robotics"],
+                    "2": ["Linear Algebra", "Python for Data Science"],
+                    "1": ["Intro to AI", "Statistics"]
+                }
+            };
+
+            // 1. تفعيل اختيار السنة بعد اختيار القسم
+            deptSelect.addEventListener("change", () => {
+                yearSelect.disabled = false;
+                yearSelect.value = ""; // تصفير السنة
+                subjectGroup.style.display = "none"; // إخفاء المواد لحد ما يختار سنة
+                subjectSelect.value = "";
+                errorMsg.style.display = "none";
+            });
+
+            // 2. إظهار المواد بناءً على القسم والسنة
+            yearSelect.addEventListener("change", () => {
+                const dept = deptSelect.value;
+                const year = yearSelect.value;
+                
+                if(dept && year) {
+                    const subjects = curriculum[dept]?.[year] || ["General Subject"];
+                    
+                    // تفريغ القائمة القديمة
+                    subjectSelect.innerHTML = '<option value="" disabled selected>Select Course...</option>';
+                    
+                    // تعبئة المواد الجديدة
+                    subjects.forEach(subj => {
+                        const option = document.createElement("option");
+                        option.value = subj;
+                        option.textContent = subj;
+                        subjectSelect.appendChild(option);
+                    });
+                    
+                    // إظهار حقل المواد بحركة أنيميشن خفيفة
+                    subjectGroup.style.display = "block";
+                    errorMsg.style.display = "none";
+                }
+            });
+
+            // 3. زرار العرض
+            viewBtn.addEventListener("click", () => {
+                const dept = deptSelect.value;
+                const year = yearSelect.value;
+                const subject = subjectSelect.value;
+
+                // التأكد إن الموظف اختار الـ 3 حاجات
+                if (!dept || !year || !subject) {
+                    errorMsg.style.display = "flex";
+                } else {
+                    errorMsg.style.display = "none";
+                    
+                    // تأثير التحميل
+                    const originalText = viewBtn.innerHTML;
+                    viewBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+                    viewBtn.disabled = true;
+
+                    // التوجيه لصفحة النتيجة مع إرسال الداتا في الرابط
+                    setTimeout(() => {
+                        window.location.href = `report-result.html?dept=${encodeURIComponent(dept)}&year=${encodeURIComponent(year)}&subject=${encodeURIComponent(subject)}`;
+                    }, 500);
+                }
+            });
+
+            // برمجة زرار الخروج الآمن
+            document.getElementById("logoutBtn").addEventListener("click", (e) => {
+                e.preventDefault();
+                if(confirm("Are you sure you want to sign out?")) {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    window.location.replace("login.html");
+                }
+            });
+        });
+    </script>
+</body>
+</html>
